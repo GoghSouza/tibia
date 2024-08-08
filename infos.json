@@ -1,1 +1,21 @@
-{"food": {"value": "F9", "position": 9}, "spell": {"value": "F4", "position": 4}, "mana_pos": {"position": [616, 32], "rgb": [0, 63, 140]}}
+{
+    "food": {
+        "value": "F5",
+        "position": 5
+    },
+    "spell": {
+        "value": "F3",
+        "position": 3
+    },
+    "mana_pos": {
+        "position": [
+            250,
+            269
+        ],
+        "rgb": [
+            197,
+            134,
+            66
+        ]
+    }
+}
