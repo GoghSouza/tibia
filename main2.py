@@ -3,8 +3,12 @@ import uuid
 import hashlib
 from tkinter import Button, Entry, Label, Tk, messagebox
 from tkinter.ttk import Combobox, Frame, Notebook
+import requests
 from ttkthemes import ThemedTk
 import var, runa
+
+# URL base da API hospedada na Vercel
+BASE_URL = 'https://servidor-sigma-nine.vercel.app/'
 
 # Função para obter o endereço MAC
 def get_mac_address():
@@ -15,25 +19,41 @@ def get_mac_address():
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# Função para verificar o login
 def verify_login(username, password, mac_address):
-    stored_username = "Gogh".upper()  # Nome de usuário definido
-    stored_password_hash = hash_password("010397")  # Hash da senha definida
-    allowed_mac_address = "74-56-3C-98-63-96".upper()  # Substitua pelo MAC permitido
+    mac_address = mac_address.upper()
 
-    if username.upper() == stored_username and hash_password(password) == stored_password_hash:
+    url = f"{BASE_URL}/login"
+    data = {
+        "username": username,
+        "password": password,
+        "mac_address": mac_address
+    }
+    response = requests.post(url, json=data)
 
-        mac_address = mac_address.upper()
-
-        if mac_address == allowed_mac_address:
+    if response.status_code == 200:
+        # Verifica a mensagem de resposta para determinar se o MAC foi registrado
+        message = response.json().get('message')
+        if message == "MAC address registrado e login bem-sucedido!":
+            messagebox.showinfo("Sucesso", "Computador Registrado e login bem-sucedido!")
             return True
         else:
+            messagebox.showinfo("Sucesso", "Login bem-sucedido!")
+            return True
+    elif response.status_code == 401:
+        message = response.json().get('error')
+        print(message)
+        if message == "MAC address inválido.":
             messagebox.showerror("Acesso Negado", 
                                  "O computador que você está tentando usar não está autorizado para acessar este programa. "
                                  "Por favor, entre em contato com o administrador para obter permissão.")
+        else:
+            messagebox.showwarning("Aviso", "Credenciais inválidas.")
             return False
+    elif response.status_code == 404:
+        messagebox.showerror("Erro", "Usuário não encontrado.")
+        return False
     else:
-        messagebox.showerror("Erro", "Nome de usuário ou senha incorretos.")
+        messagebox.showerror("Erro", response.json().get('error'))
         return False
 
 # Função para mostrar a tela de login
@@ -61,7 +81,7 @@ def show_login():
 
     Button(login_window, text="Login", command=attempt_login).grid(row=2, column=1, pady=10)
     login_window.mainloop()
-
+    
 # Função para iniciar o aplicativo principal
 def start_app():
     app = ThemedTk()
