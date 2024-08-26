@@ -4,3 +4,5 @@ build
 dist
 main2.spec
 main.spec
+*.spec
+*.pyc
