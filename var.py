@@ -29,7 +29,7 @@ keyCode = {
     "n9": 0x69,
 }
 
-def save(food, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoots, tiara, runaDeath, runaFireball, runaThunder):
+def save(food, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoots, tiara, runaDeath, runaFireball, runaThunder, runaAvalanche, explosiveArrow):
     my_data = {
         "food": {
             "value": food.get(),
@@ -70,6 +70,14 @@ def save(food, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoots, tiara
         "runa_thunderstorm": {
             "value": runaThunder.get(),
             "position": runaThunder.current()
+        },
+        "runa_avalanche": {
+            "value": runaAvalanche.get(),
+            "position": runaAvalanche.current()
+        },
+        "explosive_arrow": {
+            "value": explosiveArrow.get(),
+            "position": explosiveArrow.current()
         },
     }
     with open('hotkeyRunaConfig.json', 'w') as file:

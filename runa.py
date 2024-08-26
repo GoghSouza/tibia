@@ -50,10 +50,19 @@ def verificarItens(timeCollar, timeTiara, timeBoot):
 
     return soma
 
-def regenerarMana(lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tiara):
+def regenerarMana(vocacao, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tiara):
     inicio = time.time()
     global regenMana
-
+    if vocacao == 0 or vocacao == 1:
+        #MS e ED
+        regenVoca = 12
+    elif vocacao == 2:
+        #RP
+        regenVoca = 8
+    elif vocacao == 3:
+        #EK
+        regenVoca = 4
+    
     # Calcula os tempos finais para cada item
     timeCollar = inicio + collarPlasma
     timeBoot = inicio + softBoot
@@ -64,8 +73,7 @@ def regenerarMana(lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tia
     while time.time() - inicioRunas < ringHealing:
         if stop_event.is_set():
             break
-        regen = 12
-        regen = (regen + 24 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
+        regen = (regenVoca + 24 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
         regenMana = regen
         time.sleep(30)
                     
@@ -74,8 +82,7 @@ def regenerarMana(lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tia
     while time.time() - inicioRunas < lifeRing:
         if stop_event.is_set():
             break
-        regen = 12
-        regen = (regen + 8 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
+        regen = (regenVoca + 8 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
         regenMana = regen
         time.sleep(30)
 
@@ -84,8 +91,7 @@ def regenerarMana(lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tia
     while time.time() - inicioRunas < ringPlasma:
         if stop_event.is_set():
             break
-        regen = 12
-        regen = (regen + 4 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
+        regen = (regenVoca + 4 + verificarItens(timeCollar, timeTiara, timeBoot)) * 1.5
         regenMana = regen
         time.sleep(30)
 
@@ -197,14 +203,24 @@ def criarRunas(runa):
         custoRuna = 430
         hotRuna = "runa_thunderstorm"
         qtdRunas = 4
+    elif idRuna == 4:
+        custoRuna = 530
+        hotRuna = "runa_avalanche"
+        qtdRunas = 4
+    elif idRuna == 5:
+        custoRuna = 290
+        hotRuna = "explosive_arrow"
+        qtdRunas = 8
     else:
         stop_event.set()
     mana = 0
 
-    #Tenta 2 Runas para a mana não ficar cheia
+    #Tenta 3 Runas/Munição para a mana não ficar cheia
     if not stop_event.is_set():
         with lock:
             print("Criando runas Iniciais")
+            pyautogui.press(hotkeyConfig(hotRuna))
+            time.sleep(2)
             pyautogui.press(hotkeyConfig(hotRuna))
             time.sleep(2)
             pyautogui.press(hotkeyConfig(hotRuna))
@@ -223,9 +239,8 @@ def criarRunas(runa):
         time.sleep(6)
 
 #Função inicial do Bot
-def inicioBot(runa, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tiara):
-    
-    print(runa)
+def inicioBot(vocacao, runa, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, tiara):
+    print(vocacao)
     #Limpa a chave para encerrar o bot
     stop_event.clear()
     #Tempo de duração dos itens
@@ -244,7 +259,7 @@ def inicioBot(runa, lifeRing, ringHealing, ringPlasma, collarPlasma, softBoot, t
     colar_th = threading.Thread(target=controleColar, args=(collarPlasma,), daemon=True)
     tiara_th = threading.Thread(target=controleTiara, args=(tiara,), daemon=True)
     boot_th = threading.Thread(target=controleBoot, args=(softBoot,), daemon=True)
-    regen_th = threading.Thread(target=regenerarMana, args=(timerLife,timerHealing,timerPlasma,timerCPlasma,timerBoot,timerTiara), daemon=True)
+    regen_th = threading.Thread(target=regenerarMana, args=(vocacao,timerLife,timerHealing,timerPlasma,timerCPlasma,timerBoot,timerTiara), daemon=True)
     criar_th = threading.Thread(target=criarRunas, args=(runa,), daemon=True)
     andar_th = threading.Thread(target=andar, daemon=True)
 
