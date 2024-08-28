@@ -3,12 +3,16 @@ import uuid
 import hashlib
 from tkinter import Button, Entry, Label, Tk, messagebox
 from tkinter.ttk import Combobox, Frame, Notebook
+import webbrowser
 import requests
 from ttkthemes import ThemedTk
 import var, runa
 
 # URL base da API hospedada na Vercel
-BASE_URL = 'https://servidor-sigma-nine.vercel.app'
+BASE_URL = "https://servidor-sigma-nine.vercel.app"
+
+global versao_atual
+versao_atual = "1.0.1"
 
 # Função para obter o endereço MAC
 def get_mac_address():
@@ -18,6 +22,23 @@ def get_mac_address():
 # Função para hash da senha
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+# Verificar se versão atual do sistema é igual a ultima liberada
+def verificarVersao():
+    if versao_atual != ultima_versao:
+        messagebox.showinfo("Atualização Disponível", 
+                            "Sua versão está desatualizada em relação à mais recente liberada. "
+                            "Para garantir que você tenha acesso a todas as melhorias, "
+                            "recomendamos baixar a nova versão indo na aba Licença.")
+
+
+def atualizarVersao():
+    resposta = messagebox.askyesno("Confirmação de Atualização", 
+                                   "Deseja realmente acessar o link para baixar a versão mais recente? "
+                                   "Após confirmar, você será redirecionado para um link externo.")
+
+    if resposta:
+        webbrowser.open(linkVersao)
 
 def verify_login(username, password, mac_address):
     mac_address = mac_address.upper()
@@ -31,6 +52,12 @@ def verify_login(username, password, mac_address):
     response = requests.post(url, json=data)
 
     if response.status_code == 200:
+        global ultima_versao
+        ultima_versao = response.json().get('versao')
+        global vencimento
+        vencimento = response.json().get('vencimento')
+        global linkVersao
+        linkVersao = response.json().get('linkVersao')
         # Verifica a mensagem de resposta para determinar se o MAC foi registrado
         message = response.json().get('message')
         if message == "MAC address registrado e login bem-sucedido!":
@@ -49,6 +76,9 @@ def verify_login(username, password, mac_address):
         else:
             messagebox.showwarning("Aviso", "Credenciais inválidas.")
             return False
+    elif response.status_code == 403:
+        message = response.json().get('error')
+        messagebox.showwarning("Erro", message)
     elif response.status_code == 404:
         messagebox.showerror("Erro", "Usuário não encontrado.")
         return False
@@ -97,6 +127,9 @@ def start_app():
     hotkeysConfig = Frame(nb)
     nb.add(hotkeysConfig, text="Hotkey's")
 
+    licenca = Frame(nb)
+    nb.add(licenca, text="Licença")
+
     criacao = ["Desligado", "SD - Death Rune", "GFB - Great Fireball", "Thunderstorm", "Avalanche", "Explosive Arrow"]
     hotkeys = ["Desligado", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
 
@@ -105,6 +138,8 @@ def start_app():
         my_widget = widget(aba, **kwargs)
         my_widget.grid(row=row, column=column, padx=5, pady=5, columnspan=columnspan, sticky=sticky)
         return my_widget
+    
+    verificarVersao()
 
     # Validar que apenas Números serão digitados
     def only_numbers(char):
@@ -248,6 +283,15 @@ def start_app():
 
     btn_carregar = generate_widget(Button, aba=hotkeysConfig, row=11, column=0, text="Carregar Configurações", command=carregarHotkey)
     btn_salvar = generate_widget(Button, aba=hotkeysConfig, row=11, column=1, text="Salvar", command=salvarHotkey)
+
+    #Configuração da Aba licenças
+    lbl_versaoAtual = generate_widget(Label, aba=licenca, row=0, column=0, sticky="W", text=f"Versão atual do Bot: {versao_atual}", font=("Roboto", 12))
+    lbl_versaoFinal = generate_widget(Label, aba=licenca, row=1, column=0, sticky="W", text=f"Ultima Versão Disponivel: {ultima_versao}", font=("Roboto", 12))
+
+    if versao_atual != ultima_versao:
+        btn_atualizar = generate_widget(Button, aba=licenca, row=2, column=0, text="Baixar ultima Versão", command=atualizarVersao)
+    
+    #lbl_dataVencimento = generate_widget(Label, aba=licenca, row=3, column=0, sticky="W", text=f"Vencimento da Licença: {vencimento}", font=("Roboto", 12))
 
     app.mainloop()
 
