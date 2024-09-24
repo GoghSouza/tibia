@@ -194,7 +194,7 @@ def start_app():
     # Configuração da Aba Criador de Runas
     lbl_tituloBot = generate_widget(Label, row=0, column=0, sticky="W", text="Treino de ML por Criação de Runas/Munição", columnspan=2, font=("Roboto", 12))
     
-    lbl_vocacao = generate_widget(Label, row=1, column=0, sticky="W", text="Quantos Life Rings serão usados?", font=("Roboto", 12))
+    lbl_vocacao = generate_widget(Label, row=1, column=0, sticky="W", text="Qual vocação será usada ?", font=("Roboto", 12))
     cbx_vocacao = generate_widget(Combobox, row=1, column=1, values=("MS", "ED", "RP"), state="readonly", font=("Roboto", 12), width=12)
     cbx_vocacao.current(0)
 
